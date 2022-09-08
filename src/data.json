@@ -1,0 +1,62 @@
+[
+    {
+        "src": "/images/gallery/1.jpg",
+        "title": "Пирожное",
+        "description": "Пирожное на черном фоне"
+    },
+    {
+        "src": "/images/gallery/2.jpg",
+        "title": "Какой-то пейзаж",
+        "description": "Скорее всего в Крыму"
+    },
+    {
+        "src": "/images/gallery/3.jpg",
+        "title": "Еще пейзаж",
+        "description": "Тоже видимо в Крыму"
+    },
+    {
+        "src": "/images/gallery/4.jpg",
+        "title": "Федя",
+        "description": "Это Федя курит сигарету"
+    },
+    {
+        "src": "/images/gallery/5.jpg",
+        "title": "И еще раз Федя",
+        "description": "Опять курит"
+    },
+    {
+        "src": "/images/gallery/6.jpg",
+        "title": "А это Сима",
+        "description": "Не понимаю, почему это было в корзине"
+    },
+    {
+        "src": "/images/gallery/7.jpg",
+        "title": "Макросъемка",
+        "description": "Это всегда хорошо"
+    },
+    {
+        "src": "/images/gallery/8.jpg",
+        "title": "Какая-то речка",
+        "description": "Выглядит неплохо"
+    },
+    {
+        "src": "/images/gallery/9.jpg",
+        "title": "Деревья в Крыму",
+        "description": "Тоже очень красиво"
+    },
+    {
+        "src": "/images/gallery/10.jpg",
+        "title": "Руины с птицами",
+        "description": "Особо нечего добавить"
+    },
+    {
+        "src": "/images/gallery/11.jpg",
+        "title": "Руины",
+        "description": "Особо нечего добавить"
+    },
+    {
+        "src": "/images/gallery/12.jpg",
+        "title": "Вроде Паша",
+        "description": "Он тоже курит"
+    }
+]
