@@ -1,6 +1,5 @@
 const defaultOptions = {
-    linkClass: '.cardLink',
-    linkImageClass: '.cardImage',
+    linkClass: '.card',
 };
 
 const explosionClassName = 'explosion';
@@ -19,10 +18,10 @@ const explosionImageClassName = 'explosionImage';
 const explosionCloseClassName = 'explosionClose';
 const explosionNavsClassName = 'explosionNavs';
 
-const explosionNavClassName = 'explosionNav'; 
+const explosionNavClassName = 'explosionNav';
 const explosionNavPrevClassName = 'explosionNavPrev';
 const explosionNavNextClassName = 'explosionNavNext';
-const explosionCouterClassName = 'explosionCounter';
+const explosionCounterClassName = 'explosionCounter';
 const explosionNavDisabledClassName = 'explosionNavDisabled';
 
 const explosionPrevHiddenImageClassName = 'explosionImage_PrevHidden';
@@ -31,7 +30,83 @@ const explosionActiveImageClassName = 'explosionImage_Active';
 const explosionNextShowingImageClassName = 'explosionImage_NextShowing';
 const explosionNextHiddenImageClassName = 'explosionImage_NextHidden';
 
-class ExplositionGallery {}
+class ExplositionGallery {
+    constructor(elementNode, options) {
+        this.options = {
+            ...defaultOptions,
+            ...options
+        };
+        this.containerNode = elementNode;
+        this.linkNodes = elementNode.querySelectorAll(this.options.linkClass);
+
+        this.minWidth = 1023;
+        this.minHeight = 600;
+        this.padding = 2 * 16;
+        this.showingCount = 4; //Активных элементов галереи на экране
+        this.currentIndex = 0;
+
+        this.size = this.linkNodes.length;
+
+        this.initModal();
+        this.events();
+    }
+
+    initModal() {
+        this.modalContainerNode = document.createElement("div");
+        this.modalContainerNode.className = explosionClassName;
+
+        this.modalContainerNode.innerHTML = `
+             <div class="${explosionSummaryClassName}">
+                  <div class="${explosionSummaryContentClassName}">
+                       <h2 class="${explosionTitleClassName}"></h2>
+                       <p class="${explosionDescriptionClassName}"></p>                  
+                  </div>      
+             </div>
+             <div class="${explosionControlsClassName}">
+                  <button class="${explosionCloseClassName}"></button>
+                  <div class="${explosionNavsClassName}">
+                       <button class="${explosionNavClassName} ${explosionNavPrevClassName}"></button>
+                       <div class="${explosionCounterClassName}">1/${this.size}</div>
+                       <button class="${explosionNavClassName} ${explosionNavNextClassName}"></button>
+                  </div>             
+             </div>
+             <div class="${explosionImagesClassName}">
+                  ${Array.from(this.linkNodes).map((linkNode) => `
+                        <img src="${linkNode.getAttribute('href')}" 
+                             alt="${linkNode.dataset.title}"
+                             class="${explosionImageClassName}"
+                             data-title="${linkNode.dataset.title}"
+                             data-description="${linkNode.dataset.description}" />
+                  `).join('')}
+             </div>        
+        `;
+
+        document.body.appendChild(this.modalContainerNode);
+    }
+    
+    events() {
+        this.containerNode.addEventListener('click', this.activateGallery); 
+    }
+
+    activateGallery = (event) => {
+
+
+        event.preventDefault();
+        const linkNode = event.target.closest('a');
+        
+        if(!linkNode) {
+            return;
+        }
+
+        this.currentIndex = Array.from(this.linkNodes).findIndex((itemNode) => linkNode === itemNode);
+        this.modalContainerNode.classList.add(explosionOpeningClassName);
+
+        fadeIn(this.modalContainerNode, () => {
+            this.modalContainerNode.classList.remove(explosionOpeningClassName);
+            this.modalContainerNode.classList.add(explosionOpenedClassName);
+        });
+    }
+}
 
 /**
  * Helpers
@@ -59,7 +134,7 @@ function fadeOut(element, callback) {
 
     function animation() {
         let opacity = Number(element.style.opacity);
-    
+
         if (opacity > 0) {
             opacity = opacity - 0.04
             element.style.opacity = opacity;
@@ -97,5 +172,3 @@ function throttle(callback, delay = 200) {
         }, delay);
     }
 }
-
-
