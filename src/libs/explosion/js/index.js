@@ -82,6 +82,8 @@ class ExplositionGallery {
         `;
 
         document.body.appendChild(this.modalContainerNode);
+
+        this.explosionImageNodes = this.modalContainerNode.querySelectorAll(`.${explosionImageClassName}`); //Подключаем классы картинок(по сути сами картинки)
     }
     
     events() {
@@ -94,7 +96,11 @@ class ExplositionGallery {
         event.preventDefault();
         const linkNode = event.target.closest('a');
         
-        if(!linkNode) {
+        if(
+            !linkNode
+            || this.modalContainerNode.classList.contains(explosionOpenedClassName)
+            || this.modalContainerNode.classList.contains(explosionOpeningClassName)
+        ) {
             return;
         }
 
@@ -104,7 +110,97 @@ class ExplositionGallery {
         fadeIn(this.modalContainerNode, () => {
             this.modalContainerNode.classList.remove(explosionOpeningClassName);
             this.modalContainerNode.classList.add(explosionOpenedClassName);
+            this.switchChanges();
         });
+
+        this.setInitSizesToImages();
+        this.setInitPositionsToImages();
+    }
+
+    setInitSizesToImages() {
+        this.linkNodes.forEach((linkNode, index) => {
+            const data = linkNode.getBoundingClientRect();
+            this.explosionImageNodes[index].style.width = data.width + 'px';
+            this.explosionImageNodes[index].style.height = data.height + 'px';         
+        });
+    }
+
+    setInitPositionsToImages() {
+        this.linkNodes.forEach((linkNode, index) => {
+            const data = linkNode.getBoundingClientRect();
+            this.setPositionStyles(
+                this.explosionImageNodes[index],
+                data.left,
+                data.top,
+            );       
+        });
+    }
+
+    setPositionStyles(element, x, y) {
+        element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+    }
+
+    switchChanges() {
+        //Установка изображений на нужные позиции
+        //Установка состояний навигации
+        //Смена цифр на каунтере
+        //Описание
+
+        this.setCurrentState();
+    }
+
+    setCurrentState() {
+        this.explosionPrevHiddenImageNodes = [];
+        this.explosionPrevShowingImageNodes = [];
+        this.explosionActiveImageNodes = [];
+        this.explosionNextShowingImageNodes = [];
+        this.explosionNextHiddenImageNodes = [];
+
+        this.currentIndex
+        this.showingCount
+        
+        this.explosionImageNodes.forEach((imageNode, index) => {
+            if(index + this.showingCount < this.currentIndex) {
+                this.explosionPrevHiddenImageNodes.unshift(imageNode);
+            } else if (index < this.currentIndex) {
+                this.explosionPrevShowingImageNodes.unshift(imageNode);
+            } else if (index === this.currentIndex) {
+                this.explosionActiveImageNodes.push(imageNode);
+            } else if (index <= this.currentIndex + this.showingCount) {
+                this.explosionNextShowingImageNodes.push(imageNode);
+            } else {
+                this.explosionNextHiddenImageNodes.push(imageNode);
+            }         
+        });
+
+        this.setGalleryStyles();
+    }
+
+    setGalleryStyles() {
+        const imageWidth = this.linkNodes[0].offsetWidth;
+        const imageHeight = this.linkNodes[0].offsetHeight;
+        const modalWidth = Math.max(this.minWidth, window.innerWidth);
+        const modalHeight = Math.max(this.minHeight, window.innerHeight);   
+        
+        this.explosionPrevHiddenImageNodes.forEach((node) => (
+            this.setImageStyles(node, {
+                top: -modalHeight,
+                left: 0.31 * modalWidth,
+                opacity: 0.1,
+                zIndex: 1,
+                scale: 0.4,
+            })
+        ));
+    }
+
+    setImageStyles(element, {top, left, opacity, zIndex, scale}) {
+        if(!element) {
+            return
+        } 
+
+        element.style.opacity = opacity;
+        element.style.transform = `translate3d(${left.toFixed(1)}px, ${top.toFixed(1)}px, 0) scale(${scale})`;
+        element.style.zIndex = zIndex;
     }
 }
 

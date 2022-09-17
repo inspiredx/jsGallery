@@ -18,6 +18,10 @@
 
     &_Opening {
         display: block;
+
+        .explosionImage {   //Анимация открытия модалки
+            transition: none;              
+        }
     }
 
     &Image {
@@ -28,10 +32,10 @@
         z-index: 2;
         // opacity: .3;
         height: auto;
-        transform: translate3d(0,0,0) scale(1);
+        transform: translate3d(0, 0, 0) scale(1);
         transform-origin: 50% 50%;
         backface-visibility: hidden;
-        transition: transform .7s, opacity .7s;
+        transition: transform 0.7s, opacity 0.7s;
     }
 
     &Controls {
@@ -42,8 +46,10 @@
         position: absolute;
         top: 0;
         right: 22%;
+        margin-top: 3000px;
         height: 400px;
         z-index: 7;
+        transition: margin 0.7s;
     }
 
     &Close {
