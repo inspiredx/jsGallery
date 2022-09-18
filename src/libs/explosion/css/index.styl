@@ -45,11 +45,42 @@
         width: 3rem;
         position: absolute;
         top: 0;
-        right: 22%;
+        right: 30%;
         margin-top: 3000px;
         height: 400px;
         z-index: 7;
         transition: margin 0.7s;
+    }
+
+    &Summary {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        z-index: 9;
+        background: #2d5051;        
+        transition: width .7s;
+        color: #fff;
+        width: 0;  
+        overflow: hidden;
+        
+        &Content {
+            padding: 0.5rem 5rem;
+            opacity: 1;
+            white-space: nowrap;
+            transition: opacity .3s;            
+        }                        
+    }
+
+    
+
+    &Title {
+        font-size: 2em;
+        text-transform: uppercase;
+        letter-spacing: 0.1em
+    }
+
+    &Description {
+        color: #daa35b;
     }
 
     &Close {
@@ -84,7 +115,7 @@
         cursor: pointer;
         text-align: center;
         opacity: 1;
-        transition: background 0.3s, opacity 0.3s;
+        transition: background-color 0.3s, opacity 0.3s;
 
         &:hover {
             background-color: black;

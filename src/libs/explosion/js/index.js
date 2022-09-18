@@ -83,11 +83,75 @@ class ExplositionGallery {
 
         document.body.appendChild(this.modalContainerNode);
 
+        this.explosionCloseNode = this.modalContainerNode.querySelector(`.${explosionCloseClassName}`); //Кнопка закрытия модалки
+        this.explosionSummaryContentNode = this.modalContainerNode.querySelector(`.${explosionSummaryContentClassName}`);
+        this.explosionSummaryNode = this.modalContainerNode.querySelector(`.${explosionSummaryClassName}`); // Тайтл и описание
         this.explosionImageNodes = this.modalContainerNode.querySelectorAll(`.${explosionImageClassName}`); //Подключаем классы картинок(по сути сами картинки)
+        this.explosionControlsNode = this.modalContainerNode.querySelector(`.${explosionControlsClassName}`); //Подключаем стили навигации
+        this.explosionNavPrevNode = this.modalContainerNode.querySelector(`.${explosionNavPrevClassName}`); //Подключаем стрелки навигации
+        this.explosionNavNextNode = this.modalContainerNode.querySelector(`.${explosionNavNextClassName}`);
+        this.explosionCounterNode = this.modalContainerNode.querySelector(`.${explosionCounterClassName}`); //Подключаем счетчик
+        this.explosionTitleNode = this.modalContainerNode.querySelector(`.${explosionTitleClassName}`); //Подключаем заголовок и описание
+        this.explosionDescriptionNode = this.modalContainerNode.querySelector(`.${explosionDescriptionClassName}`);
+        this.explosionNavsNode = this.modalContainerNode.querySelector(`.${explosionNavsClassName}`); //Переключение картинок навигация
+
     }
-    
+
     events() {
-        this.containerNode.addEventListener('click', this.activateGallery); 
+        this.throttledResize = throttle(this.resize, 200);
+        window.addEventListener('resize', this.throttledResize);
+        this.containerNode.addEventListener('click', this.activateGallery);
+        this.explosionNavsNode.addEventListener('click', this.switchImage);
+        this.explosionCloseNode.addEventListener('click', this.closeGallery);
+        window.addEventListener('keyup', this.keyDown);
+    }
+
+    resize = () => {
+        if (this.modalContainerNode.classList.contains(explosionOpenedClassName)) {
+            this.setInitSizesToImages();
+            this.setGalleryStyles();
+        }
+    }
+
+    keyDown = (event) => {
+        if (this.modalContainerNode.classList.contains(explosionOpenedClassName)) {
+            if (event.key == 'Escape' || event.key === 'Esc' || event.keyCode === 27) {
+                this.closeGallery();
+            }
+        }
+    }
+
+    closeGallery = () => {
+        this.setInitPositionsToImages();
+        this.explosionImageNodes.forEach((imageNode) => {
+            imageNode.style.opacity = 1;
+        });
+        this.explosionSummaryNode.style.width = '0';
+        this.explosionControlsNode.style.marginTop = '3000px';
+
+        fadeOut(this.modalContainerNode, () => {
+            this.modalContainerNode.classList.remove(explosionOpenedClassName);
+        });
+    }
+
+
+    switchImage = (event) => {
+        event.preventDefault();
+
+        const buttonNode = event.target.closest('button');
+        if (!buttonNode) {
+            return;
+        }
+
+        if (buttonNode.classList.contains(explosionNavPrevClassName) && this.currentIndex > 0) {
+            this.currentIndex -= 1;
+        }
+
+        if (buttonNode.classList.contains(explosionNavNextClassName) && this.currentIndex < this.size - 1) {
+            this.currentIndex += 1;
+        }
+
+        this.switchChanges(true);
     }
 
     activateGallery = (event) => {
@@ -95,11 +159,11 @@ class ExplositionGallery {
 
         event.preventDefault();
         const linkNode = event.target.closest('a');
-        
-        if(
-            !linkNode
-            || this.modalContainerNode.classList.contains(explosionOpenedClassName)
-            || this.modalContainerNode.classList.contains(explosionOpeningClassName)
+
+        if (
+            !linkNode ||
+            this.modalContainerNode.classList.contains(explosionOpenedClassName) ||
+            this.modalContainerNode.classList.contains(explosionOpeningClassName)
         ) {
             return;
         }
@@ -121,7 +185,7 @@ class ExplositionGallery {
         this.linkNodes.forEach((linkNode, index) => {
             const data = linkNode.getBoundingClientRect();
             this.explosionImageNodes[index].style.width = data.width + 'px';
-            this.explosionImageNodes[index].style.height = data.height + 'px';         
+            this.explosionImageNodes[index].style.height = data.height + 'px';
         });
     }
 
@@ -132,7 +196,7 @@ class ExplositionGallery {
                 this.explosionImageNodes[index],
                 data.left,
                 data.top,
-            );       
+            );
         });
     }
 
@@ -140,13 +204,55 @@ class ExplositionGallery {
         element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
     }
 
-    switchChanges() {
+    switchChanges(hasSummaryAnimation) {
         //Установка изображений на нужные позиции
         //Установка состояний навигации
         //Смена цифр на каунтере
         //Описание
 
         this.setCurrentState();
+        this.switchDisabledNav();
+        this.changeCounter();
+        this.changeSummary(hasSummaryAnimation);
+    }
+
+    changeSummary(hasAnimation) {
+        const content = this.explosionImageNodes[this.currentIndex].dataset;
+
+        if (hasAnimation) {
+            this.explosionSummaryContentNode.style.opacity = 0;
+            setTimeout(() => {
+                this.explosionTitleNode.innerText = content.title;
+                this.explosionDescriptionNode.innerText = content.description;
+
+                this.explosionSummaryContentNode.style.opacity = 1;
+            }, 300);
+        } else {
+            this.explosionTitleNode.innerText = content.title;
+            thisx.explosionDescriptionNode.innerText = content.description;
+        }
+    }
+
+    changeCounter() {
+        this.explosionCounterNode.innerText = `${this.currentIndex +1}/${this.size}`;
+    }
+
+    switchDisabledNav() { //Состояния навигации
+        if (this.currentIndex === 0 && !this.explosionNavPrevNode.disabled) {
+            this.explosionNavPrevNode.disabled = true;
+        }
+
+        if (this.currentIndex > 0 && this.explosionNavPrevNode.disabled) {
+            this.explosionNavPrevNode.disabled = false;
+        }
+
+        if (this.currentIndex === this.size - 1 && !this.explosionNavNextNode.disabled) {
+            this.explosionNavNextNode.disabled = true;
+        }
+
+        if (this.currentIndex < this.size - 1 && this.explosionNavNextNode.disabled) {
+            this.explosionNavNextNode.disabled = false;
+        }
     }
 
     setCurrentState() {
@@ -158,9 +264,9 @@ class ExplositionGallery {
 
         this.currentIndex
         this.showingCount
-        
+
         this.explosionImageNodes.forEach((imageNode, index) => {
-            if(index + this.showingCount < this.currentIndex) {
+            if (index + this.showingCount < this.currentIndex) {
                 this.explosionPrevHiddenImageNodes.unshift(imageNode);
             } else if (index < this.currentIndex) {
                 this.explosionPrevShowingImageNodes.unshift(imageNode);
@@ -170,18 +276,22 @@ class ExplositionGallery {
                 this.explosionNextShowingImageNodes.push(imageNode);
             } else {
                 this.explosionNextHiddenImageNodes.push(imageNode);
-            }         
+            }
         });
 
         this.setGalleryStyles();
     }
 
-    setGalleryStyles() {
+
+
+
+
+    setGalleryStyles() { //Стили на координаты всех приложений
         const imageWidth = this.linkNodes[0].offsetWidth;
         const imageHeight = this.linkNodes[0].offsetHeight;
         const modalWidth = Math.max(this.minWidth, window.innerWidth);
-        const modalHeight = Math.max(this.minHeight, window.innerHeight);   
-        
+        const modalHeight = Math.max(this.minHeight, window.innerHeight);
+
         this.explosionPrevHiddenImageNodes.forEach((node) => (
             this.setImageStyles(node, {
                 top: -modalHeight,
@@ -191,16 +301,123 @@ class ExplositionGallery {
                 scale: 0.4,
             })
         ));
+
+        this.setImageStyles(this.explosionPrevShowingImageNodes[0], {
+            top: (modalHeight - imageHeight),
+            left: 0.30 * modalWidth,
+            opacity: 0.4,
+            zIndex: 4,
+            scale: 0.75,
+        });
+
+        this.setImageStyles(this.explosionPrevShowingImageNodes[1], {
+            top: 0.305 * modalHeight,
+            left: 0.11 * modalWidth,
+            opacity: 0.3,
+            zIndex: 3,
+            scale: 0.6,
+        });
+
+        this.setImageStyles(this.explosionPrevShowingImageNodes[2], {
+            top: 0,
+            left: 0.17 * modalWidth,
+            opacity: 0.2,
+            zIndex: 2,
+            scale: 0.5,
+        });
+
+        this.setImageStyles(this.explosionPrevShowingImageNodes[3], {
+            top: -0.25 * modalHeight,
+            left: 0.25 * modalWidth,
+            opacity: 0.1,
+            zIndex: 1,
+            scale: 0.4,
+        });
+
+        this.explosionActiveImageNodes.forEach((node) => (
+            this.setImageStyles(node, {
+                top: (modalHeight - imageHeight) / 2,
+                left: (modalWidth - imageWidth) / 2,
+                opacity: 1,
+                zIndex: 5,
+                scale: 1.2,
+            })
+        ));
+
+        this.setImageStyles(this.explosionNextShowingImageNodes[0], {
+            top: 0,
+            left: 0.47 * modalWidth,
+            opacity: 0.4,
+            zIndex: 4,
+            scale: 0.75,
+        });
+
+        this.setImageStyles(this.explosionNextShowingImageNodes[1], {
+            top: 0.12 * modalHeight,
+            left: 0.66 * modalWidth,
+            opacity: 0.3,
+            zIndex: 3,
+            scale: 0.6,
+        });
+
+        this.setImageStyles(this.explosionNextShowingImageNodes[2], {
+            top: 0.43 * modalHeight,
+            left: 0.71 * modalWidth,
+            opacity: 0.2,
+            zIndex: 2,
+            scale: 0.5,
+        });
+
+        this.setImageStyles(this.explosionNextShowingImageNodes[3], {
+            top: 0.69 * modalHeight,
+            left: 0.63 * modalWidth,
+            opacity: 0.1,
+            zIndex: 1,
+            scale: 0.4,
+        });
+
+        this.explosionNextHiddenImageNodes.forEach((node) => (
+            this.setImageStyles(node, {
+                top: modalHeight,
+                left: 0.53 * modalWidth,
+                opacity: 0.1,
+                zIndex: 1,
+                scale: 0.4,
+            })
+        ));
+
+        this.setControlsStyles(
+            this.explosionControlsNode, {
+                marginTop: (modalHeight - imageHeight * 1.25) / 2,
+                height: imageHeight * 1.2
+            }
+        );
+
+        this.explosionSummaryNode.style.width = '30%';
     }
 
-    setImageStyles(element, {top, left, opacity, zIndex, scale}) {
-        if(!element) {
+    setImageStyles(element, {
+        top,
+        left,
+        opacity,
+        zIndex,
+        scale
+    }) {
+        if (!element) {
             return
-        } 
+        }
 
         element.style.opacity = opacity;
         element.style.transform = `translate3d(${left.toFixed(1)}px, ${top.toFixed(1)}px, 0) scale(${scale})`;
         element.style.zIndex = zIndex;
+    }
+
+    setControlsStyles(element, {
+        marginTop,
+        height
+    }) {
+        element.style.marginTop = marginTop + 'px';
+        element.style.height = height + 'px';
     }
 }
 
